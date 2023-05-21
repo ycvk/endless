@@ -105,7 +105,7 @@ func NewServer(addr string, handler http.Handler) (srv *endlessServer) {
 		sigChan: make(chan os.Signal),
 		isChild: isChild,
 		SignalHooks: map[int]map[os.Signal][]func(){
-			PRE_SIGNAL: map[os.Signal][]func(){
+			PRE_SIGNAL: {
 				syscall.SIGHUP:  []func(){},
 				syscall.SIGUSR1: []func(){},
 				syscall.SIGUSR2: []func(){},
@@ -113,7 +113,7 @@ func NewServer(addr string, handler http.Handler) (srv *endlessServer) {
 				syscall.SIGTERM: []func(){},
 				syscall.SIGTSTP: []func(){},
 			},
-			POST_SIGNAL: map[os.Signal][]func(){
+			POST_SIGNAL: {
 				syscall.SIGHUP:  []func(){},
 				syscall.SIGUSR1: []func(){},
 				syscall.SIGUSR2: []func(){},
@@ -362,7 +362,6 @@ func (srv *endlessServer) signalHooks(ppFlag int, sig os.Signal) {
 	for _, f := range srv.SignalHooks[ppFlag][sig] {
 		f()
 	}
-	return
 }
 
 /*
@@ -430,7 +429,7 @@ func (srv *endlessServer) fork() (err error) {
 
 	// only one server instance should fork!
 	if runningServersForked {
-		return errors.New("Another process already forked. Ignoring this one.")
+		return errors.New("ignoring this one because another process already forked")
 	}
 
 	runningServersForked = true
@@ -566,7 +565,7 @@ related code endless itself runs
 */
 func (srv *endlessServer) RegisterSignalHook(prePost int, sig os.Signal, f func()) (err error) {
 	if prePost != PRE_SIGNAL && prePost != POST_SIGNAL {
-		err = fmt.Errorf("Cannot use %v for prePost arg. Must be endless.PRE_SIGNAL or endless.POST_SIGNAL.", sig)
+		err = fmt.Errorf("cannot use %v for prePost arg Must be endless.PRE_SIGNAL or endless.POST_SIGNAL", sig)
 		return
 	}
 	for _, s := range hookableSignals {
@@ -575,6 +574,6 @@ func (srv *endlessServer) RegisterSignalHook(prePost int, sig os.Signal, f func(
 			return
 		}
 	}
-	err = fmt.Errorf("Signal %v is not supported.", sig)
+	err = fmt.Errorf("signal %v is not supported", sig)
 	return
 }
