@@ -16,7 +16,9 @@ import (
 	"sync"
 	"syscall"
 	"time"
+
 	// "github.com/fvbock/uds-go/introspect"
+	"github.com/acheong08/endless/signals"
 )
 
 const (
@@ -61,11 +63,11 @@ func init() {
 
 	hookableSignals = []os.Signal{
 		syscall.SIGHUP,
-		syscall.SIGUSR1,
-		syscall.SIGUSR2,
+		signals.SIGUSR1,
+		signals.SIGUSR2,
 		syscall.SIGINT,
 		syscall.SIGTERM,
-		syscall.SIGTSTP,
+		signals.SIGTSTP,
 	}
 }
 
@@ -108,19 +110,19 @@ func NewServer(addr string, handler http.Handler) (srv *endlessServer) {
 		SignalHooks: map[int]map[os.Signal][]func(){
 			PRE_SIGNAL: {
 				syscall.SIGHUP:  []func(){},
-				syscall.SIGUSR1: []func(){},
-				syscall.SIGUSR2: []func(){},
+				signals.SIGUSR1: []func(){},
+				signals.SIGUSR2: []func(){},
 				syscall.SIGINT:  []func(){},
 				syscall.SIGTERM: []func(){},
-				syscall.SIGTSTP: []func(){},
+				signals.SIGTSTP: []func(){},
 			},
 			POST_SIGNAL: {
 				syscall.SIGHUP:  []func(){},
-				syscall.SIGUSR1: []func(){},
-				syscall.SIGUSR2: []func(){},
+				signals.SIGUSR1: []func(){},
+				signals.SIGUSR2: []func(){},
 				syscall.SIGINT:  []func(){},
 				syscall.SIGTERM: []func(){},
-				syscall.SIGTSTP: []func(){},
+				signals.SIGTSTP: []func(){},
 			},
 		},
 		state: STATE_INIT,
@@ -342,9 +344,9 @@ func (srv *endlessServer) handleSignals() {
 			if err != nil {
 				log.Println("Fork err:", err)
 			}
-		case syscall.SIGUSR1:
+		case signals.SIGUSR1:
 			log.Println(pid, "Received SIGUSR1.")
-		case syscall.SIGUSR2:
+		case signals.SIGUSR2:
 			log.Println(pid, "Received SIGUSR2.")
 			srv.hammerTime(0 * time.Second)
 		case syscall.SIGINT:
@@ -353,7 +355,7 @@ func (srv *endlessServer) handleSignals() {
 		case syscall.SIGTERM:
 			log.Println(pid, "Received SIGTERM.")
 			srv.shutdown()
-		case syscall.SIGTSTP:
+		case signals.SIGTSTP:
 			log.Println(pid, "Received SIGTSTP.")
 		default:
 			log.Printf("Received %v: nothing i care about...\n", sig)
