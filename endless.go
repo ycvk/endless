@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"os/signal"
+	"path/filepath"
 	"runtime"
 	"strings"
 	"sync"
@@ -296,9 +297,9 @@ func (srv *endlessServer) getListener(laddr string) (l net.Listener, err error) 
 			ptrOffset, existed = socketPtrOffsetMap[laddr]
 			// log.Println("laddr", laddr, "ptr offset", socketPtrOffsetMap[laddr])
 		}
-
+		var f *os.File
 		if existed {
-			f := os.NewFile(uintptr(3+ptrOffset), "")
+			f = os.NewFile(uintptr(3+ptrOffset), "")
 			l, err = net.FileListener(f)
 		} else {
 			l, err = net.Listen("tcp", laddr)
@@ -469,9 +470,9 @@ func (srv *endlessServer) fork() (err error) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	
+
 	path = path + "/" + filepath.Base(os.Args[0])
-	
+
 	var args []string
 	if len(os.Args) > 1 {
 		args = os.Args[1:]
@@ -592,18 +593,19 @@ func (srv *endlessServer) RegisterSignalHook(prePost int, sig os.Signal, f func(
 
 /*
 Close unused listeners, used in forked new process like that:
-func main() {
-	......
-	// close unused endless listener
-	go func() {
-		time.Sleep(time.Second * 5)
-		endless.CloseUnusedListeners()
-	}()
-	......
-}
+
+	func main() {
+		......
+		// close unused endless listener
+		go func() {
+			time.Sleep(time.Second * 5)
+			endless.CloseUnusedListeners()
+		}()
+		......
+	}
 */
 func CloseUnusedListeners() error {
-	for addr, ptrOffset := range(socketPtrOffsetMap) {
+	for addr, ptrOffset := range socketPtrOffsetMap {
 		if !stringInSlice(addr, runningServersOrder) {
 			f := os.NewFile(uintptr(3+ptrOffset), "")
 			l, err := net.FileListener(f)
