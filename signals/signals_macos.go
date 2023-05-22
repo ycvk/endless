@@ -9,3 +9,5 @@ const (
 	SIGUSR2 = syscall.SIGUSR2
 	SIGTSTP = syscall.SIGTSTP
 )
+
+var Kill func(pid int, sig syscall.Signal) error = syscall.Kill

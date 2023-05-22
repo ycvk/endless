@@ -228,7 +228,7 @@ func (srv *endlessServer) ListenAndServe() (err error) {
 
 	if srv.isChild {
 		if runtime.GOOS != "windows" {
-			syscall.Kill(syscall.Getppid(), syscall.SIGTERM)
+			signals.Kill(syscall.Getppid(), syscall.SIGTERM)
 		}
 	}
 
@@ -281,7 +281,7 @@ func (srv *endlessServer) ListenAndServeTLS(certFile, keyFile string) (err error
 
 	if srv.isChild {
 		if runtime.GOOS != "windows" {
-			syscall.Kill(syscall.Getppid(), syscall.SIGTERM)
+			signals.Kill(syscall.Getppid(), syscall.SIGTERM)
 		}
 	}
 
