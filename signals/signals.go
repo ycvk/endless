@@ -1,4 +1,4 @@
-//go:build linux || darwin || freebsd || netbsd || openbsd || solaris || macos
+//go:build !windows
 
 package signals
 
