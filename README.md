@@ -1,8 +1,10 @@
 # endless
 
-Zero downtime restarts for golang HTTP and HTTPS servers. (for golang 1.3+)
+Zero downtime restarts for golang HTTP and HTTPS servers. (for golang 1.19+)
 
 [![GoDoc](https://godoc.org/github.com/fvbock/endless?status.svg)](https://godoc.org/github.com/fvbock/endless)
+
+You might want to use [tableflip](https://github.com/cloudflare/tableflip) by Cloudflare instead for process restarts.
 
 ## Inspiration & Credits
 
@@ -14,30 +16,27 @@ There is https://github.com/rcrowley/goagain and i looked at https://fitstar.git
 
 I found the excellent post [Graceful Restart in Golang](http://grisha.org/blog/2014/06/03/graceful-restart-in-golang/) by [Grisha Trubetskoy](https://github.com/grisha) and took his code as a start. So a lot of credit to Grisha!
 
-
 ## Features
 
 - Drop-in replacement for `http.ListenAndServe` and `http.ListenAndServeTLS`
 - Signal hooks to execute your own code before or after the listened to signals (SIGHUP, SIGUSR1, SIGUSR2, SIGINT, SIGTERM, SIGTSTP)
 - You can start multiple servers from one binary and endless will take care of the different sockets/ports assignments when restarting
 
-
 ## Default Timeouts & MaxHeaderBytes
 
 There are three variables exported by the package that control the values set for `DefaultReadTimeOut`, `DefaultWriteTimeOut`, and `MaxHeaderBytes` on the inner [`http.Server`](https://golang.org/pkg/net/http/#Server):
 
-	DefaultReadTimeOut    time.Duration
-	DefaultWriteTimeOut   time.Duration
-	DefaultMaxHeaderBytes int
+    DefaultReadTimeOut    time.Duration
+    DefaultWriteTimeOut   time.Duration
+    DefaultMaxHeaderBytes int
 
 The endless default behaviour is to use the same defaults defined in `net/http`.
 
 These have impact on endless by potentially not letting the parent process die until all connections are handled/finished.
 
-
 ### Hammer Time
 
-To deal with hanging requests on the parent after restarting endless will *hammer* the parent 60 seconds after receiving the shutdown signal from the forked child process. When hammered still running requests get terminated. This behaviour can be controlled by another exported variable:
+To deal with hanging requests on the parent after restarting endless will _hammer_ the parent 60 seconds after receiving the shutdown signal from the forked child process. When hammered still running requests get terminated. This behaviour can be controlled by another exported variable:
 
     DefaultHammerTime time.Duration
 
@@ -47,21 +46,19 @@ If you had hanging requests and the server got hammered you will see a log messa
 
     2015/04/04 13:04:10 [STOP - Hammer Time] Forcefully shutting down parent
 
-
 ## Examples & Documentation
 
     import "github.com/fvbock/endless"
 
 and then replacing `http.ListenAndServe` with `endless.ListenAndServe` or `http.ListenAndServeTLS` with `endless.ListenAndServeTLS`
 
-	err := endless.ListenAndServe("localhost:4242", handler)
+    err := endless.ListenAndServe("localhost:4242", handler)
 
 After starting your server you can make some changes, build, and send `SIGHUP` to the running process and it will finish handling any outstanding requests and serve all new incoming ones with the new binary.
 
 More examples are in [here](https://github.com/fvbock/endless/tree/master/examples)
 
 There is also [GoDoc Documentation](https://godoc.org/github.com/fvbock/endless)
-
 
 ## Signals
 
@@ -75,8 +72,7 @@ The endless server will listen for the following signals: `syscall.SIGHUP`, `sys
 
 `SIGUSR1` and `SIGTSTP` are listened for but do not trigger anything in the endless server itself. (probably useless - might get rid of those two)
 
-You can hook your own functions to be called *pre* or *post* signal handling - eg. pre fork or pre shutdown. More about that in the [hook example](https://github.com/fvbock/endless/tree/master/examples#hooking-into-the-signal-handling).
-
+You can hook your own functions to be called _pre_ or _post_ signal handling - eg. pre fork or pre shutdown. More about that in the [hook example](https://github.com/fvbock/endless/tree/master/examples#hooking-into-the-signal-handling).
 
 ## Limitation: No changing of ports
 
@@ -86,13 +82,12 @@ Currently you cannot restart a server on a different port than the previous vers
 
 If you want to save actual pid file, you can change the `BeforeBegin` hook like this:
 
-	server := endless.NewServer("localhost:4242", handler)
-	server.BeforeBegin = func(add string) {
-		log.Printf("Actual pid is %d", syscall.Getpid())
-		// save it somehow
-	}
-	err := server.ListenAndServe()
-
+    server := endless.NewServer("localhost:4242", handler)
+    server.BeforeBegin = func(add string) {
+    	log.Printf("Actual pid is %d", syscall.Getpid())
+    	// save it somehow
+    }
+    err := server.ListenAndServe()
 
 ## TODOs
 
