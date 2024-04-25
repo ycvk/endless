@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/fvbock/endless"
 	"github.com/gorilla/mux"
+	"github.com/ycvk/endless"
 )
 
 func handler(w http.ResponseWriter, r *http.Request) {

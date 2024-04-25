@@ -5,17 +5,17 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/fvbock/endless"
 	"github.com/gorilla/mux"
+	"github.com/ycvk/endless"
 )
 
-func handler(w http.ResponseWriter, r *http.Request) {
+func simpleHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("WORLD!"))
 }
 
 func main() {
 	mux1 := mux.NewRouter()
-	mux1.HandleFunc("/hello", handler).
+	mux1.HandleFunc("/hello", simpleHandler).
 		Methods("GET")
 
 	err := endless.ListenAndServe("localhost:4242", mux1)

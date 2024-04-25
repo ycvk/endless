@@ -17,8 +17,7 @@ import (
 	"syscall"
 	"time"
 
-	// "github.com/fvbock/uds-go/introspect"
-	"https://github.com/g-utils/endless/signals"
+	"github.com/ycvk/endless/signals"
 )
 
 const (
